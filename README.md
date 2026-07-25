@@ -27,6 +27,17 @@ A high-performance Machine Learning REST API built with **FastAPI**, **Scikit-Le
 - **Validation:** Pydantic
 
 ---
+# 🎮 Game Analytics ML API
+
+A high-performance Machine Learning REST API built with **FastAPI**, **Scikit-Learn**, and **Pydantic**. This service predicts expected Metacritic ratings and overall market reception for video games based on attributes such as genre, pricing, team size, and feature support.
+
+---
+
+## 🌐 Live API & Interactive Docs
+- **Interactive Swagger UI (Test in Browser):** [https://game-analytics-ml-api.onrender.com/docs](https://game-analytics-ml-api.onrender.com/docs)
+- **Base API Endpoint:** `https://game-analytics-ml-api.onrender.com`
+
+---
 
 # 📦 Local Setup & Installation
 
