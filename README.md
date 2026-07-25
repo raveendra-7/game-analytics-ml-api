@@ -26,10 +26,6 @@ A high-performance Machine Learning REST API built with **FastAPI**, **Scikit-Le
 - **Model Serialization:** Joblib
 - **Validation:** Pydantic
 
----
-# 🎮 Game Analytics ML API
-
-A high-performance Machine Learning REST API built with **FastAPI**, **Scikit-Learn**, and **Pydantic**. This service predicts expected Metacritic ratings and overall market reception for video games based on attributes such as genre, pricing, team size, and feature support.
 
 ---
 
