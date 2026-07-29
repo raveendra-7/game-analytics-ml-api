@@ -7,7 +7,15 @@ import joblib
 model = joblib.load('game_rating_model.joblib')
 
 app = FastAPI(title="Game Analytics ML API", version="1.0")
+from fastapi.middleware.cors import CORSMiddleware
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class GameFeatures(BaseModel):
     genre: str
     is_multiplayer: int
