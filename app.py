@@ -1,5 +1,6 @@
 import re
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import pandas as pd
 import joblib
@@ -7,8 +8,8 @@ import joblib
 model = joblib.load('game_rating_model.joblib')
 
 app = FastAPI(title="Game Analytics ML API", version="1.0")
-from fastapi.middleware.cors import CORSMiddleware
 
+# Enable CORS for frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,6 +17,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 class GameFeatures(BaseModel):
     genre: str
     is_multiplayer: int
