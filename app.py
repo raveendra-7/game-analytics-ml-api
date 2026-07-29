@@ -21,8 +21,8 @@ app.add_middleware(
 class GameFeatures(BaseModel):
     genre: str
     is_multiplayer: int = Field(..., ge=0, le=1)
-    price_usd: float = Field(..., ge=0.0, le=1000.0, description="Price in USD (max $1000)")
-    team_size: int = Field(..., ge=1, le=10000, description="Team size in developers")
+    price_usd: float = Field(..., ge=0.0, description="Price in USD")
+    team_size: int = Field(..., ge=1, description="Team size in developers")
     has_achievements: int = Field(..., ge=0, le=1)
 
 class PromptRequest(BaseModel):
@@ -36,9 +36,9 @@ class PromptRequest(BaseModel):
 def clip_features(features_dict: dict) -> dict:
     """Clips numerical inputs to realistic bounds before feeding into ML model."""
     clipped = features_dict.copy()
-    # Cap price to a realistic market range (e.g., $0 to $200)
+    # Cap price to a realistic market range ($0 to $200)
     clipped["price_usd"] = min(max(float(clipped["price_usd"]), 0.0), 200.0)
-    # Cap team size (e.g., 1 to 1000)
+    # Cap team size (1 to 1000)
     clipped["team_size"] = min(max(int(clipped["team_size"]), 1), 1000)
     return clipped
 
