@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Analytics ML Predictor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+  <div class="max-w-2xl w-full bg-slate-900 rounded-2xl shadow-2xl p-6 border border-slate-800">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-extrabold text-indigo-400">🎮 Game Analytics Predictor</h1>
+      <p class="text-slate-400 text-sm mt-1">Predict Metacritic scores using Machine Learning</p>
+    </div>
+
+    <!-- Mode Selector Tabs -->
+    <div class="flex bg-slate-950 p-1 rounded-xl mb-6 border border-slate-800">
+      <button id="textTab" onclick="switchTab('text')" class="flex-1 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white transition">Natural Language</button>
+      <button id="manualTab" onclick="switchTab('manual')" class="flex-1 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition">Manual Specs</button>
+    </div>
+
+    <!-- Form 1: Natural Language Mode -->
+    <div id="textMode" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-2 text-slate-300">Describe Your Game Concept</label>
+        <textarea id="gameDescription" rows="4" 
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 focus:outline-none focus:border-indigo-500 transition"
+          placeholder="e.g., We are a small studio team of 4 devs making a $15 singleplayer indie RPG with steam achievements"></textarea>
+      </div>
+
+      <button onclick="predictFromText()" 
+        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-indigo-600/20">
+        Run Prediction ✨
+      </button>
+    </div>
+
+    <!-- Form 2: Manual Feature Mode -->
+    <div id="manualMode" class="space-y-4 hidden">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Genre</label>
+          <select id="genreSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200">
+            <option value="RPG">RPG</option>
+            <option value="Action">Action</option>
+            <option value="Strategy">Strategy</option>
+            <option value="Indie">Indie</option>
+            <option value="Shooter">Shooter</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Target Price ($USD)</label>
+          <input type="number" id="priceInput" value="29.99" step="0.01" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Team Size</label>
+          <input type="number" id="teamInput" value="12" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200" />
+        </div>
+
+        <div class="flex flex-col justify-center space-y-2 pt-2">
+          <label class="inline-flex items-center space-x-2 text-xs text-slate-300">
+            <input type="checkbox" id="multiplayerInput" class="rounded border-slate-800 bg-slate-950 text-indigo-600 focus:ring-0" checked>
+            <span>Multiplayer Supported</span>
+          </label>
+          <label class="inline-flex items-center space-x-2 text-xs text-slate-300">
+            <input type="checkbox" id="achievementsInput" class="rounded border-slate-800 bg-slate-950 text-indigo-600 focus:ring-0" checked>
+            <span>Steam Achievements</span>
+          </label>
+        </div>
+      </div>
+
+      <button onclick="predictFromManual()" 
+        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-indigo-600/20">
+        Calculate Score 🚀
+      </button>
+    </div>
+
+    <!-- Output Dashboard -->
+    <div id="resultContainer" class="hidden mt-6 p-5 bg-slate-950 rounded-xl border border-slate-800 animate-fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <p class="text-xs text-slate-500 uppercase font-semibold">Predicted Rating</p>
+          <div id="predictedRating" class="text-4xl font-black text-indigo-400 mt-1">--</div>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Market Reception</p>
+          <span id="verdictBadge" class="px-3 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">--</span>
+        </div>
+      </div>
+
+      <div id="featuresBlock" class="border-t border-slate-800/80 pt-3">
+        <p class="text-xs text-slate-500 uppercase font-semibold mb-2">Parsed Model Inputs</p>
+        <div id="parsedFeatures" class="grid grid-cols-2 gap-2 text-xs text-slate-300"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://game-analytics-ml-api.onrender.com";
+
+    function switchTab(mode) {
+      const textMode = document.getElementById("textMode");
+      const manualMode = document.getElementById("manualMode");
+      const textTab = document.getElementById("textTab");
+      const manualTab = document.getElementById("manualTab");
+
+      if (mode === 'text') {
+        textMode.classList.remove("hidden");
+        manualMode.classList.add("hidden");
+        textTab.className = "flex-1 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white transition";
+        manualTab.className = "flex-1 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition";
+      } else {
+        manualMode.classList.remove("hidden");
+        textMode.classList.add("hidden");
+        manualTab.className = "flex-1 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white transition";
+        textTab.className = "flex-1 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-slate-200 transition";
+      }
+    }
+
+    function renderResults(data, features) {
+      document.getElementById("predictedRating").innerText = `${data.predicted_rating} / 100`;
+      document.getElementById("verdictBadge").innerText = data.verdict;
+
+      document.getElementById("parsedFeatures").innerHTML = `
+        <div><span class="text-slate-500">Genre:</span> ${features.genre}</div>
+        <div><span class="text-slate-500">Price:</span> $${features.price_usd}</div>
+        <div><span class="text-slate-500">Team Size:</span> ${features.team_size} devs</div>
+        <div><span class="text-slate-500">Multiplayer:</span> ${features.is_multiplayer ? "Yes" : "No"}</div>
+      `;
+
+      document.getElementById("resultContainer").classList.remove("hidden");
+    }
+
+    async function predictFromText() {
+      const description = document.getElementById("gameDescription").value;
+      if (!description.trim()) return alert("Please enter a game description!");
+
+      try {
+        const response = await fetch(`${API_URL}/predict-from-text`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description })
+        });
+        const data = await response.json();
+        renderResults(data, data.parsed_features);
+      } catch (err) {
+        alert("Failed to reach API. Make sure Render service is live!");
+      }
+    }
+
+    async function predictFromManual() {
+      const payload = {
+        genre: document.getElementById("genreSelect").value,
+        price_usd: parseFloat(document.getElementById("priceInput").value),
+        team_size: parseInt(document.getElementById("teamInput").value),
+        is_multiplayer: document.getElementById("multiplayerInput").checked ? 1 : 0,
+        has_achievements: document.getElementById("achievementsInput").checked ? 1 : 0
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/predict`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        renderResults(data, payload);
+      } catch (err) {
+        alert("Failed to reach API. Make sure Render service is live!");
+      }
+    }
+  </script>
+</body>
+</html>
