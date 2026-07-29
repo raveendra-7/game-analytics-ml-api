@@ -32,6 +32,7 @@ A high-performance Machine Learning REST API built with **FastAPI**, **Scikit-Le
 ## 🌐 Live API & Interactive Docs
 - **Interactive Swagger UI (Test in Browser):** [https://game-analytics-ml-api.onrender.com/docs](https://game-analytics-ml-api.onrender.com/docs)
 - **Base API Endpoint:** `https://game-analytics-ml-api.onrender.com`
+- **GIT Pages:** `https://raveendra-7.github.io/game-analytics-ml-api/`
 
 ---
 
