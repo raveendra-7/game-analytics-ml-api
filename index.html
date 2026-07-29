@@ -122,6 +122,17 @@
     function renderResults(data, features) {
       const ratingElement = document.getElementById("predictedRating");
       const verdictElement = document.getElementById("verdictBadge");
+
+      // Guard check against missing or undefined prediction values
+      if (!data || data.predicted_rating === undefined) {
+        ratingElement.className = "text-2xl font-bold text-rose-500 mt-1";
+        ratingElement.innerText = "Error Processing Inputs";
+        verdictElement.className = "px-3 py-1 text-xs font-bold rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30";
+        verdictElement.innerText = "Invalid";
+        document.getElementById("resultContainer").classList.remove("hidden");
+        return;
+      }
+
       const score = parseFloat(data.predicted_rating);
 
       // Check for negative score or poor rating (< 50)
@@ -162,7 +173,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ description })
         });
-        
+
         if (!response.ok) {
           const errData = await response.json();
           alert(`Validation Error: ${errData.detail[0]?.msg || "Invalid input"}`);
